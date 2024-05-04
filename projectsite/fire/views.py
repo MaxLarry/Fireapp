@@ -185,3 +185,18 @@ def map_station(request):
     }
 
     return render(request, 'map_station.html', context)
+
+def map_Incidents(request):
+    # Fetching fire incidents along with their location details
+    fireIncidents = Incident.objects.select_related('location').values('location__name', 'location__latitude', 'location__longitude')
+
+    # Converting latitude and longitude values to float
+    for fs in fireIncidents:
+        fs['latitude'] = float(fs['location__latitude'])
+        fs['longitude'] = float(fs['location__longitude'])
+
+    context = {
+        'Incident': fireIncidents,
+    }
+
+    return render(request, 'map_incidents.html', context)
