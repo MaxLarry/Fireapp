@@ -27,7 +27,7 @@ class Incident(BaseModel):
         ('Major Fire', 'Major Fire'),
     )
     location = models.ForeignKey(Locations, on_delete=models.CASCADE)
-    date_time = models.DateTimeField(blank=True, null=True)
+    date_time = models.DateField(blank=True, null=True)
     severity_level = models.CharField(max_length=45, choices=SEVERITY_CHOICES)
     description = models.CharField(max_length=250)
 
