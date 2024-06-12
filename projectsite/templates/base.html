@@ -115,12 +115,12 @@
                   <ul class="nav nav-collapse">
                     <li>
                       <a href="{%url 'dashboard-chart'%}">
-                        <span class="sub-item">Dashboard 1</span>
+                        <span class="sub-item">Reports</span>
                       </a>
                     </li>
                     <li>
                       <a href="#">
-                        <span class="sub-item">Dashboard 2</span>
+                        <span class="sub-item">News</span>
                       </a>
                     </li>
                   </ul>
@@ -142,20 +142,32 @@
                   <ul class="nav nav-collapse">
                     <li class="nav-item">
                       <a href="{% url 'firestation-list' %}">
-                        <i class="fas fa-fire"></i>
-                        <p>Fire Stations</p>
+                        <span class="sub-item">Fire Stations</span>
                       </a>
                     </li>
                     <li class="nav-item">
                       <a href="{% url 'fireincident-list' %}">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Fire Incidents</p>
+                        <span class="sub-item">Fire Incidents</span>
                       </a>
                     </li>
                     <li class="nav-item">
                       <a href="{% url 'location-list' %}">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <p>Location</p>
+                        <span class="sub-item">Location</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{% url 'firetruck-list' %}">
+                        <span class="sub-item">Fire Trucks</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{% url 'firefighter-list' %}">
+                        <span class="sub-item">Fire Fighters</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="{% url 'weathercondition-list' %}">
+                        <span class="sub-item">Weather Condition</span>
                       </a>
                     </li>
                   </ul>

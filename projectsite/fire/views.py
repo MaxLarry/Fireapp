@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from fire.models import Locations, Incident, FireStation
-from fire.forms import LocationForm, IncidentForm, FireStationForm
+from fire.models import Locations, Incident, FireStation, FireTruck, Firefighters, WeatherConditions
+from fire.forms import LocationForm, IncidentForm, FireStationForm, FireFighterForm, FireTruckForm, WeatherConForm
 from django.urls import reverse_lazy
 
 from typing import Any
@@ -52,29 +52,23 @@ def PieCountbySeverity(request):
     return JsonResponse(data)
 
 def LineCountbyMonth(request):
-
     current_year = datetime.now().year
-
     result = {month: 0 for month in range(1, 13)}
 
-    incidents_per_month = Incident.objects.filter(date_time__year=current_year) \
-        .values_list('date_time', flat=True)
+    incidents_per_month = Incident.objects.filter(
+        date_time__year=current_year
+    ).exclude(date_time__isnull=True).values_list('date_time', flat=True)
 
-    # Counting the number of incidents per month
     for date_time in incidents_per_month:
-        month = date_time.month
-        result[month] += 1
+        if date_time is not None:
+            month = date_time.month
+            result[month] += 1
 
-    # If you want to convert month numbers to month names, you can use a dictionary mapping
-    month_names = {
-        1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
-        7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
-    }
-
-    result_with_month_names = {
-        month_names[int(month)]: count for month, count in result.items()}
+    month_names = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
+    result_with_month_names = {month_names[int(month)]: count for month, count in result.items()}
 
     return JsonResponse(result_with_month_names)
+
 
 def MultilineIncidentTop3Country(request):
 
@@ -228,9 +222,9 @@ class LocationList(ListView):
         if self.request.GET.get("q") != None:
             query = self.request.GET.get('q')
             qs = qs.filter(Q(name__icontains=query) | 
-                        Q (city__icontains=query) |
-                        Q (address__icontains=query) |
-                        Q (country__icontains=query))
+                        Q(city__icontains=query) |
+                        Q(address__icontains=query) |
+                        Q(country__icontains=query))
         return qs
 
 class LocationCreateView(CreateView):
@@ -264,9 +258,9 @@ class FirestationList(ListView):
         if self.request.GET.get("q") != None:
             query = self.request.GET.get('q')
             qs = qs.filter(Q(name__icontains=query) | 
-                        Q (city__icontains=query) |
-                        Q (address__icontains=query) |
-                        Q (country__icontains=query))
+                        Q(city__icontains=query) |
+                        Q(address__icontains=query) |
+                        Q(country__icontains=query))
         return qs
 
 class FirestationCreateView(CreateView):
@@ -300,10 +294,10 @@ class FireincidentList(ListView):
         qs = super(FireincidentList, self).get_queryset(*args, **kwargs)
         if self.request.GET.get("q") != None:
             query = self.request.GET.get('q')
-            qs = qs.filter(Q(Locations__name__icontains=query) | 
-                           Q(Locations__city__icontains=query) |
-                           Q(Locations__country__icontains=query) |
-                        Q (severity_level__icontains=query))
+            qs = qs.filter(Q(location__name__icontains=query) | 
+                           Q(location__city__icontains=query) |
+                           Q(location__country__icontains=query) |
+                           Q(severity_level__icontains=query))
         return qs
 
 class FireincidentCreateView(CreateView):
@@ -323,3 +317,116 @@ class FireincidentDeleteView(DeleteView):
     template_name = 'fireincident/fireincident_del.html'
     success_url = reverse_lazy('fireincident-list')
 
+
+#-----------------Firetruckss--------------------------------
+
+
+class FiretrucksList(ListView):
+    model = FireTruck
+    context_object_name = 'firetruck'
+    template_name = 'firetruck/firetruck_list.html'
+    paginate_by = 10
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super(FiretrucksList, self).get_queryset(*args, **kwargs)
+        if self.request.GET.get("q") != None:
+            query = self.request.GET.get('q')
+            qs = qs.filter(Q(truck_number__icontains=query) | 
+                           Q(model__icontains=query) |
+                           Q(capacity__icontains=query) |
+                           Q(station__name__icontains=query))
+        return qs
+
+class FiretrucksCreateView(CreateView):
+    model = FireTruck
+    form_class = FireTruckForm
+    template_name = 'firetruck/firetruck_add.html'
+    success_url = reverse_lazy('firetruck-list')
+
+class FiretrucksUpdateView(UpdateView):
+    model = FireTruck
+    form_class = FireTruckForm
+    template_name = 'firetruck/firetruck_edit.html'
+    success_url = reverse_lazy('firetruck-list')
+
+class FiretrucksDeleteView(DeleteView):
+    model = FireTruck
+    template_name = 'firetruck/firetruck_del.html'
+    success_url = reverse_lazy('firetruck-list')
+
+
+
+#-----------------Firefighterssss--------------------------------
+
+
+class FireFightersList(ListView):
+    model = Firefighters
+    context_object_name = 'firefighter'
+    template_name = 'firefighter/firefighter_list.html'
+    paginate_by = 10
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super(FireFightersList, self).get_queryset(*args, **kwargs)
+        if self.request.GET.get("q") != None:
+            query = self.request.GET.get('q')
+            qs = qs.filter(Q(name__icontains=query) | 
+                           Q(rank__icontains=query) |
+                           Q(experience_level__icontains=query) |
+                           Q(station__name__icontains=query)|
+                           Q(station__country__icontains=query))
+        return qs
+
+class FireFightersCreateView(CreateView):
+    model = Firefighters
+    form_class = FireFighterForm
+    template_name = 'firefighter/firefighter_add.html'
+    success_url = reverse_lazy('firefighter-list')
+
+class FireFightersUpdateView(UpdateView):
+    model = Firefighters
+    form_class = FireFighterForm
+    template_name = 'firefighter/firefighter_edit.html'
+    success_url = reverse_lazy('firefighter-list')
+
+class FireFightersDeleteView(DeleteView):
+    model = Firefighters
+    template_name = 'firefighter/firefighter_del.html'
+    success_url = reverse_lazy('firefighter-list')
+
+
+
+#-----------------weathercondtions--------------------------------
+
+
+class WeatherConditionList(ListView):
+    model = WeatherConditions
+    context_object_name = 'weathercondition'
+    template_name = 'weathercon/weathercon_list.html'
+    paginate_by = 10
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super(WeatherConditionList, self).get_queryset(*args, **kwargs)
+        if self.request.GET.get("q") != None:
+            query = self.request.GET.get('q')
+            qs = qs.filter(Q(incident__location__name__icontains=query) | 
+                           Q(temperature__icontains=query) |
+                           Q(humidity__icontains=query) |
+                           Q(wind_speed__icontains=query))
+        return qs
+
+class WeatherConditionCreateView(CreateView):
+    model = WeatherConditions
+    form_class = WeatherConForm
+    template_name = 'weathercon/weathercon_add.html'
+    success_url = reverse_lazy('weathercon-list')
+
+class WeatherConditionUpdateView(UpdateView):
+    model = WeatherConditions
+    form_class = WeatherConForm
+    template_name = 'weathercon/weathercon_edit.html'
+    success_url = reverse_lazy('weathercon-list')
+
+class WeatherConditionDeleteView(DeleteView):
+    model = WeatherConditions
+    template_name = 'weathercon/weathercon_del.html'
+    success_url = reverse_lazy('weathercon-list')

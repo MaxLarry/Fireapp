@@ -39,12 +39,12 @@ class FireStation(BaseModel):
     longitude = models.DecimalField(
         max_digits=22, decimal_places=16, null=True, blank=True)
     address = models.CharField(max_length=150)
-    city = models.CharField(max_length=150)  # can be in separate table
-    country = models.CharField(max_length=150)  # can be in separate table
+    city = models.CharField(max_length=150) 
+    country = models.CharField(max_length=150) 
 
 
 class Firefighters(BaseModel):
-    XP_CHOICES = (
+    RANK_CHOICES = (
         ('Probationary Firefighter', 'Probationary Firefighter'),
         ('Firefighter I', 'Firefighter I'),
         ('Firefighter II', 'Firefighter II'),
@@ -52,17 +52,22 @@ class Firefighters(BaseModel):
         ('Driver', 'Driver'),
         ('Captain', 'Captain'),
         ('Battalion Chief', 'Battalion Chief'),)
+    
+    XP_CHOICES = (
+        ('Beginner', 'Beginner'),
+        ('Intermediate', 'Intermediate'),
+        ('Advanced', 'Advanced'),
+        ('Expert', 'Expert'),)
     name = models.CharField(max_length=150)
-    rank = models.CharField(max_length=150)
-    experience_level = models.CharField(max_length=150)
-    station = models.CharField(
-        max_length=45, null=True, blank=True, choices=XP_CHOICES)
+    rank = models.CharField(max_length=45, null=True, blank=True, choices=RANK_CHOICES)
+    experience_level = models.CharField(max_length=45, null=True, blank=True, choices=XP_CHOICES)
+    station = models.ForeignKey(FireStation, on_delete=models.CASCADE)
 
 
 class FireTruck(BaseModel):
     truck_number = models.CharField(max_length=150)
     model = models.CharField(max_length=150)
-    capacity = models.CharField(max_length=150)  # water
+    capacity = models.IntegerField()
     station = models.ForeignKey(FireStation, on_delete=models.CASCADE)
 
 
